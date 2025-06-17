@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Ultimate Tic Tac Toe (Standard Game)</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(-45deg, #111, #222, #333, #000);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
+      color: #fff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      margin: 0;
+      padding: 20px;
+    }
+
+    @keyframes gradientBG {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    /* Light theme styles */
+    body.light {
+      background: linear-gradient(-45deg, #f0f0f0, #e0e0e0, #d0d0d0, #c0c0c0);
+      color: #111;
+    }
+
+    body.light h1 {
+      color: #00887a; /* Darker teal for light theme */
+      text-shadow: 0 0 10px #00887a;
+    }
+
+    /* Updated: Theme toggle icon styling for light theme */
+    body.light .theme-toggle {
+      border-color: #333;
+      color: #333;
+    }
+    body.light .theme-toggle:hover {
+      background-color: #333;
+      color: #f0f0f0;
+    }
+
+    body.light button {
+      border-color: rgba(0,0,0,0.3); /* Softer borders for light theme buttons */
+      color: #333;
+      box-shadow: none;
+    }
+    body.light button:hover {
+      background-color: #333;
+      color: #f0f0f0;
+    }
+    body.light input {
+      background-color: #ccc;
+      color: #111;
+    }
+    body.light .cell {
+      background: #ccc;
+      border: 2px solid #00887a; /* Match h1 color */
+    }
+    body.light .cell:hover {
+      background: #bbb;
+    }
+    body.light .winner-message {
+      color: #00887a; /* Match h1 color */
+      text-shadow: none;
+    }
+
+
+    h1 {
+      font-size: 2.5em;
+      color: #00ffcc;
+      margin-bottom: 10px;
+      text-shadow: 0 0 15px #00ffcc;
+      transition: color 0.3s ease, text-shadow 0.3s ease; /* Transition for theme change */
+    }
+
+    /* Updated: Theme toggle icon positioning and styling */
+    .theme-toggle {
+      position: absolute;
+      top: 10px;
+      right: 20px;
+      background: transparent;
+      border: 2px solid #fff;
+      padding: 8px 12px; /* Adjusted padding for icon */
+      border-radius: 50%; /* Make it round */
+      color: #fff;
+      cursor: pointer;
+      font-size: 1.2em; /* Icon size */
+      transition: all 0.3s ease;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .menu, .controls, .size-select, .difficulty-select, .name-inputs {
+      margin: 10px;
+      text-align: center;
+      display: none;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .menu.active, .controls.active, .size-select.active,
+    .difficulty-select.active, .name-inputs.active {
+      display: flex;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border-radius: 8px;
+      background: transparent;
+      border: 2px solid;
+      transition: all 0.3s ease-in-out;
+    }
+
+    input {
+      padding: 8px 15px;
+      border-radius: 6px;
+      border: none;
+      font-size: 16px;
+      text-align: center;
+      background-color: #333; /* Darker background for inputs */
+      color: #fff;
+    }
+
+    .btn-pvp         { border-color: #00ffe7; color: #00ffe7; box-shadow: 0 0 10px #00ffe7; }
+    .btn-ai          { border-color: #ff00ff; color: #ff00ff; box-shadow: 0 0 10px #ff00ff; }
+    .btn-pvpvp       { border-color: #00ff00; color: #00ff00; box-shadow: 0 0 10px #00ff00; }
+    .btn-gentle      { border-color: #99ffff; color: #99ffff; box-shadow: 0 0 10px #99ffff; }
+    .btn-average     { border-color: #66ccff; color: #66ccff; box-shadow: 0 0 10px #66ccff; }
+    .btn-advanced    { border-color: #3399ff; color: #3399ff; box-shadow: 0 0 10px #3399ff; }
+    .btn-aggressive  { border-color: #ff9933; color: #ff9933; box-shadow: 0 0 10px #ff9933; }
+    .btn-nightmare   { border-color: #ff3333; color: #ff3333; box-shadow: 0 0 10px #ff3333; }
+    .btn-back        { border-color: #cccccc; color: #cccccc; box-shadow: 0 0 10px #cccccc; }
+    .btn-restart     { border-color: #ffff00; color: #ffff00; box-shadow: 0 0 10px #ffff00; }
+    .btn-reset-score { border-color: #ff6666; color: #ff6666; box-shadow: 0 0 10px #ff6666; }
+
+
+    .btn-pvp:hover, .btn-ai:hover, .btn-pvpvp:hover,
+    .btn-gentle:hover, .btn-average:hover, .btn-advanced:hover,
+    .btn-aggressive:hover, .btn-nightmare:hover,
+    .btn-back:hover, .btn-restart:hover, .btn-reset-score:hover {
+      background-color: currentColor;
+      color: #111;
+      box-shadow: none; /* Remove shadow on hover for cleaner look */
+    }
+    /* Add specific hover states for light theme buttons where color needs to be adjusted */
+    .light .btn-pvp:hover, .light .btn-ai:hover, .light .btn-pvpvp:hover,
+    .light .btn-gentle:hover, .light .btn-average:hover, .light .btn-advanced:hover,
+    .light .btn-aggressive:hover, .light .btn-nightmare:hover,
+    .light .btn-back:hover, .light .btn-restart:hover, .light .btn-reset-score:hover {
+      color: #f0f0f0; /* Ensure text is light on colored hover */
+    }
+
+
+    .status, .winner-message {
+      font-size: 20px;
+      margin-top: 10px;
+      text-align: center;
+    }
+
+    .winner-message {
+      font-size: 32px;
+      font-weight: bold;
+      color: #00ffcc;
+      animation: pop 0.5s ease-in-out;
+      text-shadow: 0 0 10px #00ffcc;
+    }
+
+    @keyframes pop {
+      0% { transform: scale(0); opacity: 0; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .board {
+      display: grid;
+      gap: 5px;
+      margin: 20px 0;
+      user-select: none;
+      width: clamp(280px, 90vw, 700px); /* Responsive max width for board */
+      box-sizing: border-box; /* Ensure padding and border are included in the width */
+      grid-template-columns: repeat(var(--board-size), 1fr); /* Dynamic columns */
+      grid-template-rows: repeat(var(--board-size), 1fr); /* Dynamic rows */
+    }
+
+    .cell {
+      background: #222;
+      border: 2px solid #00ffcc;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: bold;
+      cursor: pointer;
+      aspect-ratio: 1 / 1; /* Keep cells square */
+      clip-path: polygon(
+        30% 0%, 70% 0%, 100% 30%, 100% 70%,
+        70% 100%, 30% 100%, 0% 70%, 0% 30%
+      );
+      transition: background 0.3s ease, border-color 0.3s ease;
+
+      /* Responsive font size for cells */
+      font-size: clamp(18px, 5vw, 30px); /* Adjust min/max as needed */
+    }
+
+    .cell:hover {
+      background: #333;
+    }
+    .light .cell:hover {
+      background: #bbb;
+    }
+
+    .cell.X { color: #00ffe7; } /* Color for Player X */
+    .cell.O { color: #ff00ff; } /* Color for Player O (AI) */
+    .cell.Z { color: #00ff00; } /* Color for Player Z (3-player mode) */
+
+    /* Scoreboard styles */
+    .scoreboard {
+        margin-top: 20px;
+        font-size: 1.2em;
+        padding: 10px 20px;
+        border: 2px solid #00ffcc;
+        border-radius: 10px;
+        background-color: rgba(0, 0, 0, 0.4);
+        display: flex; /* Changed from 'none' initially in CSS */
+        gap: 20px;
+        justify-content: center;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+
+    .scoreboard span {
+        font-weight: bold;
+        padding: 5px 10px;
+        border-radius: 5px;
+    }
+
+    .scoreboard .score-X { color: #00ffe7; }
+    .scoreboard .score-O { color: #ff00ff; }
+    .scoreboard .score-Z { color: #00ff00; }
+
+    /* Light theme scoreboard */
+    body.light .scoreboard {
+        border-color: #00887a;
+        background-color: rgba(255, 255, 255, 0.6);
+        color: #111;
+    }
+    body.light .scoreboard .score-X { color: #00887a; }
+    body.light .scoreboard .score-O { color: #800080; } /* Adjust for better contrast in light mode */
+    body.light .scoreboard .score-Z { color: #006400; }
+  </style>
+</head>
+<body>
+  <i id="themeToggleIcon" class="fas fa-sun theme-toggle" onclick="toggleTheme()" aria-label="Toggle theme"></i>
+  <h1>Ultimate Tic Tac Toe (Standard Game)</h1>
+
+  <div class="menu active" id="menu">
+    <p>Select Game Mode:</p>
+    <button class="btn-pvp" onclick="selectMode('pvp')" aria-label="Player vs Player mode">Player vs Player</button>
+    <button class="btn-ai" onclick="selectMode('ai')" aria-label="Player vs AI mode">Player vs AI</button>
+    <button class="btn-pvpvp" onclick="selectMode('pvpvp')" aria-label="3 Player PvP mode">3-Player PvP</button>
+  </div>
+
+  <div class="name-inputs" id="nameInputs">
+    <p>Enter Player Names:</p>
+    <input id="name1" placeholder="Player 1 Name (X)" aria-label="Player 1 Name" />
+    <input id="name2" placeholder="Player 2 Name (O)" aria-label="Player 2 Name" />
+    <input id="name3" placeholder="Player 3 Name (Z)" aria-label="Player 3 Name" />
+    <button class="btn-pvp" onclick="saveNames()">Continue</button>
+    <button class="btn-back" onclick="goBack()">Back</button>
+  </div>
+
+  <div class="difficulty-select" id="difficultySelect">
+    <p>Select AI Difficulty:</p>
+    <button class="btn-gentle" onclick="setDifficulty('gentle')">Gentle (Random)</button>
+    <button class="btn-average" onclick="setDifficulty('average')">Average (Win/Block)</button>
+    <button class="btn-advanced" onclick="setDifficulty('advanced')">Advanced (Minimax Depth 3)</button>
+    <button class="btn-aggressive" onclick="setDifficulty('aggressive')">Aggressive (Minimax Depth 5)</button>
+    <button class="btn-nightmare" onclick="setDifficulty('nightmare')">Nightmare (Full Minimax)</button>
+    <button class="btn-back" onclick="goBack()">Back</button>
+  </div>
+
+  <div class="size-select" id="sizeSelect">
+    <p>Select Board Size:</p>
+    <button class="btn-pvp" onclick="setBoardSize(3)">3 x 3</button>
+    <button class="btn-pvpvp" onclick="setBoardSize(4)">4 x 4</button>
+    <button class="btn-ai" onclick="setBoardSize(5)">5 x 5</button>
+    <button class="btn-pvp" onclick="setBoardSize(7)">7 x 7</button>
+    <button class="btn-pvpvp" onclick="setBoardSize(9)">9 x 9</button>
+    <button class="btn-back" onclick="goBack()">Back</button>
+  </div>
+
+  <div class="controls" id="controls">
+    <button class="btn-restart" onclick="resetGame()">Restart Game</button>
+    <button class="btn-reset-score" onclick="resetScores()">Reset Scores</button>
+    <button class="btn-back" onclick="goBack()">Back to Menu</button>
+  </div>
+
+  <div class="scoreboard" id="scoreboard" style="display:none;">
+    <span id="scoreX" class="score-X">X: 0</span>
+    <span id="scoreO" class="score-O">O: 0</span>
+    <span id="scoreZ" class="score-Z" style="display:none;">Z: 0</span>
+  </div>
+
+  <div class="status" id="status"></div>
+  <div class="winner-message" id="winnerMsg"></div>
+  <div class="board" id="board"></div>
+
+  <script>
+    // Game state variables
+    let board = [], boardSize = 3, currentPlayer = 'X';
+    let players = []; // Will be set based on mode
+    // Default player names. 'O' is 'AI' by default for consistent scoreboard display.
+    let playerNames = { 'X': 'Player X', 'O': 'AI', 'Z': 'Player Z' };
+    let mode = '', gameActive = false;
+    let difficulty = 'gentle', step = 0; // step represents the current "menu" step: 0=mode, 1=names/difficulty, 2=size, 3=game
+    let autoResetTimer = null; // Initialize to null
+
+    // Score variables
+    let scores = { 'X': 0, 'O': 0, 'Z': 0 };
+
+    // DOM elements
+    const boardEl = document.getElementById('board');
+    const statusEl = document.getElementById('status');
+    const winnerMsg = document.getElementById('winnerMsg');
+    const menu = document.getElementById('menu');
+    const sizeSelect = document.getElementById('sizeSelect');
+    const difficultySelect = document.getElementById('difficultySelect');
+    const controls = document.getElementById('controls');
+    const nameInputs = document.getElementById('nameInputs');
+    const nameInput1 = document.getElementById('name1');
+    const nameInput2 = document.getElementById('name2');
+    const nameInput3 = document.getElementById('name3');
+    const scoreboardEl = document.getElementById('scoreboard');
+    const scoreXEl = document.getElementById('scoreX');
+    const scoreOEl = document.getElementById('scoreO');
+    const scoreZEl = document.getElementById('scoreZ');
+    // Get the theme toggle icon element
+    const themeToggleIcon = document.getElementById('themeToggleIcon');
+
+
+    // --- Utility Functions ---
+
+    // Toggle theme and update icon
+    function toggleTheme() {
+      document.body.classList.toggle('light');
+      // Check if the body now has the 'light' class
+      if (document.body.classList.contains('light')) {
+        themeToggleIcon.classList.remove('fa-sun');
+        themeToggleIcon.classList.add('fa-moon');
+      } else {
+        themeToggleIcon.classList.remove('fa-moon');
+        themeToggleIcon.classList.add('fa-sun');
+      }
+    }
+
+    // Hide all menus
+    function hideAllMenus() {
+      menu.classList.remove('active');
+      sizeSelect.classList.remove('active');
+      difficultySelect.classList.remove('active');
+      controls.classList.remove('active');
+      nameInputs.classList.remove('active');
+      // Always ensure scoreboard is hidden when moving to any menu state,
+      // and only explicitly shown when game starts.
+      scoreboardEl.style.display = 'none';
+      // Clear any auto-reset timer when moving between menus
+      clearTimeout(autoResetTimer);
+    }
+
+    // Update status message
+    function updateStatus() {
+      if (gameActive) {
+        statusEl.textContent = `${playerNames[currentPlayer] || 'Player ' + currentPlayer}'s turn`;
+      } else {
+        statusEl.textContent = '';
+      }
+    }
+
+    // Update scoreboard display
+    function updateScoreboard() {
+        scoreXEl.textContent = `${playerNames['X']}: ${scores['X']}`;
+        scoreOEl.textContent = `${playerNames['O']}: ${scores['O']}`;
+
+        if (mode === 'pvpvp') {
+            scoreZEl.textContent = `${playerNames['Z']}: ${scores['Z']}`;
+            scoreZEl.style.display = 'inline';
+        } else {
+            scoreZEl.style.display = 'none';
+        }
+    }
+
+    // Reset all scores
+    function resetScores() {
+        scores = { 'X': 0, 'O': 0, 'Z': 0 };
+        updateScoreboard(); // Update scoreboard display after resetting scores
+    }
+
+    // --- Game Flow Functions ---
+
+    // Select game mode
+    function selectMode(selectedMode) {
+      console.log(`[selectMode] Mode selected: ${selectedMode}`);
+      mode = selectedMode;
+      step = 1; // Move to next step (names or difficulty)
+      players = mode === 'pvpvp' ? ['X', 'O', 'Z'] : ['X', 'O'];
+      currentPlayer = players[0]; // Reset current player for new mode
+
+      hideAllMenus();
+
+      if (mode === 'ai') {
+        // For AI mode, set player X's name from input (or default), O's name as 'AI'
+        playerNames['X'] = nameInput1.value.trim() || 'Player X';
+        playerNames['O'] = 'AI'; // Explicitly set AI's name for AI mode
+        difficultySelect.classList.add('active');
+        console.log(`[selectMode] AI mode selected. Player X: ${playerNames['X']}, Player O: ${playerNames['O']}`);
+      } else {
+        // Show name inputs for PvP modes
+        nameInputs.classList.add('active');
+        nameInput3.style.display = (mode === 'pvpvp') ? 'block' : 'none';
+        console.log(`[selectMode] PvP mode selected. Showing name inputs.`);
+      }
+      // Clear inputs when entering name screen to ensure fresh entry
+      nameInput1.value = '';
+      nameInput2.value = '';
+      nameInput3.value = '';
+
+      // Reset scores when changing game mode (assuming new game)
+      resetScores();
+    }
+
+    // Save player names
+    function saveNames() {
+      // These will be used by updateScoreboard and game logic
+      playerNames['X'] = nameInput1.value.trim() || 'Player X';
+      playerNames['O'] = nameInput2.value.trim() || 'Player O';
+      if (mode === 'pvpvp') {
+        playerNames['Z'] = nameInput3.value.trim() || 'Player Z';
+        console.log(`[saveNames] Names saved: X=${playerNames['X']}, O=${playerNames['O']}, Z=${playerNames['Z']}`);
+      } else {
+        console.log(`[saveNames] Names saved: X=${playerNames['X']}, O=${playerNames['O']}`);
+      }
+
+      hideAllMenus();
+      sizeSelect.classList.add('active');
+      step = 2; // Move to select board size
+    }
+
+    // Set AI difficulty
+    function setDifficulty(level) {
+      console.log(`[setDifficulty] AI difficulty set to: ${level}`);
+      difficulty = level;
+      hideAllMenus();
+      sizeSelect.classList.add('active');
+      step = 2; // Move to select board size
+    }
+
+    // Set board size and start game
+    function setBoardSize(size) {
+      console.log(`[setBoardSize] Board size set to: ${size}x${size}`);
+      boardSize = size;
+      hideAllMenus();
+      controls.classList.add('active');
+      step = 3; // Game is active
+      startGame();
+      // Show and update scoreboard only when the game is about to start/has started
+      scoreboardEl.style.display = 'flex';
+      updateScoreboard();
+    }
+
+    // Start or restart game
+    function startGame() {
+      console.log("[startGame] Initializing new game...");
+      board = Array(boardSize * boardSize).fill('');
+      currentPlayer = players[0]; // Always start with the first player in the array
+      gameActive = true;
+      winnerMsg.textContent = ''; // Clear winner message for new game
+      updateStatus();
+      clearTimeout(autoResetTimer); // Ensure any pending auto-reset is cleared
+      drawBoard();
+
+      // If AI mode and AI is the first player, trigger bot move
+      if (mode === 'ai' && currentPlayer === 'O') {
+         console.log("[startGame] AI is first player, triggering botMove...");
+         setTimeout(botMove, 500);
+      }
+      console.log("[startGame] Game started. Current board:", board);
+    }
+
+    // Draw the board
+    function drawBoard() {
+      boardEl.innerHTML = '';
+      // Set CSS variable for grid columns/rows dynamically
+      boardEl.style.setProperty('--board-size', boardSize);
+      board.forEach((cell, i) => {
+        const div = document.createElement('div');
+        div.classList.add('cell');
+        // Add class for player color based on content
+        if (cell === 'X') div.classList.add('X');
+        else if (cell === 'O') div.classList.add('O');
+        else if (cell === 'Z') div.classList.add('Z');
+
+        div.textContent = cell;
+        div.onclick = () => makeMove(i, false);
+        boardEl.appendChild(div);
+      });
+    }
+
+    // Make a move (player or AI)
+    function makeMove(index, isAI = false) {
+      console.log(`[makeMove] Called for index: ${index}, isAI: ${isAI}, currentPlayer: ${currentPlayer}`);
+
+      // Crucial check: Prevent moves if game not active, cell already taken, or human tries to move on AI's turn
+      if (!gameActive || board[index] !== '' || (mode === 'ai' && currentPlayer === 'O' && !isAI)) {
+        console.log(`[makeMove] Move blocked. Reason: gameActive=${gameActive}, board[${index}]='${board[index]}', isAI=${isAI}, currentPlayer=${currentPlayer}, mode=${mode}`);
+        return;
+      }
+
+      board[index] = currentPlayer;
+      console.log(`[makeMove] Player ${currentPlayer} made move to index ${index}.`);
+      drawBoard();
+
+      if (checkWinner(currentPlayer)) {
+        console.log(`[makeMove] Winner detected: ${currentPlayer}`);
+        scores[currentPlayer]++; // Increment score for the winning player
+        updateScoreboard(); // Update scoreboard display
+        endGame(`${playerNames[currentPlayer] || 'Player ' + currentPlayer} Wins!`, true); // Pass true for auto-start
+        return;
+      }
+      if (!board.includes('')) { // Check for draw (board full)
+        console.log("[makeMove] Draw detected (board full).");
+        endGame("It's a Draw!", true); // Pass true for auto-start
+        return;
+      }
+
+      nextPlayer(); // Switch to the next player's turn
+      console.log(`[makeMove] Switched to next player: ${currentPlayer}`);
+      updateStatus(); // Update status after switching player
+
+      // If AI mode and it's AI's turn, trigger bot move
+      if (mode === 'ai' && currentPlayer === 'O') {
+        console.log("[makeMove] It's AI's turn. Calling botMove with delay...");
+        setTimeout(botMove, 500);
+      }
+    }
+
+    // Switch to the next player
+    function nextPlayer() {
+      const currentIndex = players.indexOf(currentPlayer);
+      currentPlayer = players[(currentIndex + 1) % players.length];
+      console.log("[nextPlayer] Player switched to:", currentPlayer);
+    }
+
+    // --- AI Logic ---
+
+    // Heuristic evaluation function for a given board state
+    // This is crucial for larger boards where full Minimax is too slow.
+    // It estimates how "good" a board is for the maximizingPlayer (AI)
+    // without needing to play out the entire game.
+    function evaluateBoard(currentBoard, maximizingPlayer, minimizingPlayer) {
+        let score = 0;
+        // Adjust requiredWinLength for larger boards:
+        // 3x3 needs 3 in a row
+        // 4x4, 5x5 needs 4 in a row
+        // 7x7, 9x9 will need 5 in a row for better challenge and playability
+        const requiredWinLength = (boardSize <= 3) ? 3 : (boardSize <= 5 ? 4 : 5);
+
+
+        // Helper to check a line (row, col, diag) for potential wins/blocks
+        function checkLine(line) {
+            let aiCount = 0;
+            let humanCount = 0;
+            for (const cell of line) {
+                if (cell === maximizingPlayer) {
+                    aiCount++;
+                } else if (cell === minimizingPlayer) {
+                    humanCount++;
+                }
+            }
+
+            // Prioritize immediate wins and blocks (N-in-a-row)
+            if (aiCount === requiredWinLength) return 1000; // AI wins immediately
+            if (humanCount === requiredWinLength) return -1000; // Human wins immediately
+
+            // Evaluate potential threats/opportunities for the required win length
+            // Example: If requiredWinLength is 3, 2 in a row for AI is good, 2 for human is bad
+            if (aiCount > 0 && humanCount === 0) {
+                // Scores for forming lines (closer to win, higher score)
+                if (aiCount === requiredWinLength - 1) score += 50; // One away from winning
+                if (aiCount === requiredWinLength - 2) score += 10;
+            } else if (humanCount > 0 && aiCount === 0) {
+                // Negative scores for human forming lines
+                if (humanCount === requiredWinLength - 1) score -= 50; // One away from losing
+                if (humanCount === requiredWinLength - 2) score -= 10;
+            }
+            return 0; // No immediate win/loss, score contributed to overall by adding to `score` variable
+        }
+
+        // Check rows
+        for (let i = 0; i < boardSize; i++) {
+            let row = [];
+            for (let j = 0; j < boardSize; j++) {
+                row.push(currentBoard[i * boardSize + j]);
+            }
+            checkLine(row); // Add to global score
+        }
+
+        // Check columns
+        for (let i = 0; i < boardSize; i++) { // i is column index
+            let col = [];
+            for (let j = 0; j < boardSize; j++) { // j is row index
+                col.push(currentBoard[j * boardSize + i]);
+            }
+            checkLine(col); // Add to global score
+        }
+
+        // Check diagonals (from any starting point that allows a 'requiredWinLength' line)
+        // Top-left to bottom-right diagonals
+        for (let r = 0; r <= boardSize - requiredWinLength; r++) {
+            for (let c = 0; c <= boardSize - requiredWinLength; c++) {
+                let diag = [];
+                for (let k = 0; k < requiredWinLength; k++) {
+                    diag.push(currentBoard[(r + k) * boardSize + (c + k)]);
+                }
+                checkLine(diag);
+            }
+        }
+
+        // Top-right to bottom-left diagonals
+        for (let r = 0; r <= boardSize - requiredWinLength; r++) {
+            for (let c = requiredWinLength - 1; c < boardSize; c++) {
+                let diag = [];
+                for (let k = 0; k < requiredWinLength; k++) {
+                    diag.push(currentBoard[(r + k) * boardSize + (c - k)]);
+                }
+                checkLine(diag);
+            }
+        }
+
+        return score;
+    }
+
+
+    // Bot move with proper difficulty
+    function botMove() {
+      console.log("[botMove] Function entered. Current player:", currentPlayer);
+      if (!gameActive) {
+          console.log("[botMove] Game not active, exiting botMove.");
+          return;
+      }
+      const emptyCells = board.reduce((acc, val, idx) => val === '' ? acc.concat(idx) : acc, []);
+      console.log("[botMove] Empty cells available:", emptyCells);
+
+      if (emptyCells.length === 0) {
+          updateStatus();
+          console.log("[botMove] No empty cells left for AI, cannot make move.");
+          return;
+      }
+
+      statusEl.textContent = "AI is thinking...";
+
+      let move = null;
+      const aiPlayer = 'O';
+      const humanPlayer = 'X';
+
+      let currentDepthLimit = 0;
+
+      // Adjust depth limits based on board size for AI performance
+      switch (difficulty) {
+        case 'gentle':
+          move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+          console.log("[botMove] Gentle AI chose random move:", move);
+          break;
+
+        case 'average':
+          // Prioritize AI win, then blocking human win, then random
+          move = findWinningMove(aiPlayer) ?? findWinningMove(humanPlayer) ?? emptyCells[Math.floor(Math.random() * emptyCells.length)];
+          console.log("[botMove] Average AI chose move (win/block/random):", move);
+          break;
+
+        case 'advanced':
+          currentDepthLimit = (boardSize <= 3) ? 3 : (boardSize <= 5 ? 2 : 1);
+          console.log(`[botMove] Advanced AI: Running minimax with depth ${currentDepthLimit}`);
+          move = minimaxDecision(aiPlayer, humanPlayer, currentDepthLimit);
+          console.log("[botMove] Advanced AI chose move:", move);
+          break;
+
+        case 'aggressive':
+          currentDepthLimit = (boardSize <= 3) ? 5 : (boardSize <= 5 ? 3 : 2);
+          console.log(`[botMove] Aggressive AI: Running minimax with depth ${currentDepthLimit}`);
+          move = minimaxDecision(aiPlayer, humanPlayer, currentDepthLimit);
+          console.log("[botMove] Aggressive AI chose move:", move);
+          break;
+
+        case 'nightmare':
+          // The depth limit for Nightmare needs careful tuning for larger boards.
+          // For now, it's capped very low on larger boards to avoid freezing.
+          currentDepthLimit = (boardSize === 3) ? 9 : (boardSize === 4 ? 4 : (boardSize === 5 ? 3 : 2));
+          console.log(`[botMove] Nightmare AI: Running minimax with depth ${currentDepthLimit}`);
+          move = minimaxDecision(aiPlayer, humanPlayer, currentDepthLimit);
+          console.log("[botMove] Nightmare AI chose move:", move);
+          break;
+
+        default:
+          move = emptyCells[Math.floor(Math.random() * emptyCells.length)];
+          console.log("[botMove] Default AI chose random move:", move);
+      }
+
+      // Final fallback if AI strategy somehow returns null/undefined or an invalid move
+      if (move === null || move === undefined || emptyCells.indexOf(move) === -1) {
+          console.warn(`[botMove] Invalid or non-existent move (${move}) returned by AI strategy. Falling back to first empty cell.`);
+          move = emptyCells[0]; // As a last resort, take the first available move
+      }
+
+      // Small delay to make it seem like AI is "thinking" and to allow status update to show
+      setTimeout(() => {
+          console.log(`[botMove] Delay complete. Calling makeMove(${move}, true) for AI.`);
+          makeMove(move, true); // True indicates it's an AI move
+      }, 300);
+    }
+
+    // Find winning move for player p on the *current* global board state
+    function findWinningMove(p) {
+      console.log(`[findWinningMove] Checking for winning move for player: ${p}`);
+      for (const idx of board.keys()) {
+        if (board[idx] === '') {
+          board[idx] = p; // Try placing p at this index
+          if (checkWinnerOnBoard(board, p)) {
+            board[idx] = ''; // Revert the change
+            console.log(`[findWinningMove] Found winning move at index: ${idx}`);
+            return idx; // Found a winning move
+          }
+          board[idx] = ''; // Revert the change
+        }
+      }
+      console.log(`[findWinningMove] No winning move found for player: ${p}`);
+      return null; // No winning move found
+    }
+
+    // Minimax implementation for AI
+    // `maximizingPlayer` is the AI's symbol, `minimizingPlayer` is the human's symbol
+    function minimaxDecision(maximizingPlayer, minimizingPlayer, depthLimit) {
+        console.log(`[minimaxDecision] Started for ${maximizingPlayer} (AI) vs ${minimizingPlayer} (Human) with depth limit ${depthLimit}`);
+        let bestScore = -Infinity;
+        let bestMove = null;
+        let originalBoard = [...board]; // Create a copy of the current board state
+
+        const emptyCells = originalBoard.reduce((acc, val, idx) => val === '' ? acc.concat(idx) : acc, []);
+        if (emptyCells.length === 0) {
+            console.log("[minimaxDecision] No empty cells, returning null.");
+            return null;
+        }
+
+        // Shuffle empty cells to introduce some randomness if multiple moves have same best score
+        // This makes AI less predictable when multiple optimal moves exist.
+        for (let i = emptyCells.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [emptyCells[i], emptyCells[j]] = [emptyCells[j], emptyCells[i]];
+        }
+
+        for (const idx of emptyCells) {
+            originalBoard[idx] = maximizingPlayer; // Make the move on the copied board
+            let score = minimax(originalBoard, 0, false, maximizingPlayer, minimizingPlayer, depthLimit);
+            originalBoard[idx] = ''; // Undo the move (backtrack)
+
+            if (score > bestScore) {
+                bestScore = score;
+                bestMove = idx;
+            }
+            // console.log(`[minimaxDecision]   Move ${idx}: Score ${score}. Current best score: ${bestScore}, best move: ${bestMove}`); // Too verbose, uncomment if needed for deep debugging
+        }
+        console.log(`[minimaxDecision] Decision: Best score ${bestScore}, Best move ${bestMove}`);
+        return bestMove ?? emptyCells[0]; // Fallback to first empty cell if no best move found (shouldn't happen with proper logic)
+    }
+
+    function minimax(currentBoard, depth, isMaximizingPlayer, maximizingPlayer, minimizingPlayer, depthLimit) {
+        // Base cases for recursion
+        if (checkWinnerOnBoard(currentBoard, maximizingPlayer)) {
+            return 1000 - depth; // AI wins: higher score for shallower depth
+        }
+        if (checkWinnerOnBoard(currentBoard, minimizingPlayer)) {
+            return depth - 1000; // Human wins: lower score (negative) for shallower depth
+        }
+        if (!currentBoard.includes('')) {
+            return 0; // Draw
+        }
+        if (depth >= depthLimit) {
+            // If depth limit reached, use heuristic evaluation
+            return evaluateBoard(currentBoard, maximizingPlayer, minimizingPlayer);
+        }
+
+        if (isMaximizingPlayer) {
+            let bestScore = -Infinity;
+            for (let i = 0; i < currentBoard.length; i++) {
+                if (currentBoard[i] === '') {
+                    currentBoard[i] = maximizingPlayer;
+                    let score = minimax(currentBoard, depth + 1, false, maximizingPlayer, minimizingPlayer, depthLimit);
+                    currentBoard[i] = '';
+                    bestScore = Math.max(bestScore, score);
+                }
+            }
+            return bestScore;
+        } else {
+            let bestScore = Infinity;
+            for (let i = 0; i < currentBoard.length; i++) {
+                if (currentBoard[i] === '') {
+                    currentBoard[i] = minimizingPlayer;
+                    let score = minimax(currentBoard, depth + 1, true, maximizingPlayer, minimizingPlayer, depthLimit);
+                    currentBoard[i] = '';
+                    bestScore = Math.min(bestScore, score);
+                }
+            }
+            return bestScore;
+        }
+    }
+
+    // Check winner logic on arbitrary board state (used for minimax and helper functions)
+    function checkWinnerOnBoard(bd, p) {
+      // Adjusted requiredWinLength logic:
+      // 3x3 -> 3 in a row
+      // 4x4, 5x5 -> 4 in a row
+      // 7x7, 9x9 -> 5 in a row
+      const requiredWinLength = (boardSize <= 3) ? 3 : (boardSize <= 5 ? 4 : 5);
+
+      // Rows and Columns check
+      for (let i = 0; i < boardSize; i++) {
+          // Check Row i
+          let consecutiveCountRow = 0;
+          // Check Column i
+          let consecutiveCountCol = 0;
+
+          for (let j = 0; j < boardSize; j++) {
+              // For rows
+              if (bd[i * boardSize + j] === p) {
+                  consecutiveCountRow++;
+                  if (consecutiveCountRow === requiredWinLength) return true;
+              } else {
+                  consecutiveCountRow = 0;
+              }
+
+              // For columns
+              if (bd[j * boardSize + i] === p) {
+                  consecutiveCountCol++;
+                  if (consecutiveCountCol === requiredWinLength) return true;
+              } else {
+                  consecutiveCountCol = 0;
+              }
+          }
+      }
+
+      // Diagonals (main and anti-diagonals, and their sub-diagonals for N-in-a-row)
+      // Iterates through all possible starting points for diagonal wins
+      // Top-left to bottom-right diagonals
+      for (let r = 0; r <= boardSize - requiredWinLength; r++) {
+          for (let c = 0; c <= boardSize - requiredWinLength; c++) {
+              let consecutiveCount = 0;
+              for (let k = 0; k < requiredWinLength; k++) {
+                  if (bd[(r + k) * boardSize + (c + k)] === p) {
+                      consecutiveCount++;
+                      if (consecutiveCount === requiredWinLength) return true;
+                  } else {
+                      consecutiveCount = 0;
+                  }
+              }
+          }
+      }
+
+      // Top-right to bottom-left diagonals
+      for (let r = 0; r <= boardSize - requiredWinLength; r++) {
+          for (let c = requiredWinLength - 1; c < boardSize; c++) {
+              let consecutiveCount = 0;
+              for (let k = 0; k < requiredWinLength; k++) {
+                  if (bd[(r + k) * boardSize + (c - k)] === p) {
+                      consecutiveCount++;
+                      if (consecutiveCount === requiredWinLength) return true;
+                  } else {
+                      consecutiveCount = 0;
+                  }
+              }
+          }
+      }
+
+      return false;
+    }
+
+    // Check winner logic for current global board (used by UI)
+    function checkWinner(p) {
+      console.log(`[checkWinner] Checking for winner: ${p}`);
+      return checkWinnerOnBoard(board, p);
+    }
+
+    // End game UI updates
+    function endGame(msg, autoStartNext = false) { // Added autoStartNext parameter
+      console.log(`[endGame] Game ended with message: "${msg}". Auto-start next: ${autoStartNext}`);
+      gameActive = false;
+      winnerMsg.textContent = msg;
+      statusEl.textContent = 'Game Over!';
+
+      if (autoStartNext) {
+        // Set a timeout to start a new game after 1 second
+        autoResetTimer = setTimeout(() => {
+          console.log("[endGame] Auto-starting new game...");
+          startGame();
+        }, 1000); // 1000 milliseconds = 1 second
+      }
+    }
+
+    // Reset/restart current game
+    function resetGame() {
+      console.log("[resetGame] Manually restarting game.");
+      // Clear any pending auto-start before manually restarting
+      clearTimeout(autoResetTimer);
+      startGame();
+    }
+
+    // Go back button logic with proper menu logic based on mode and step
+    function goBack() {
+      console.log(`[goBack] Going back from step: ${step}`);
+      clearTimeout(autoResetTimer); // Clear any pending auto-reset
+      boardEl.innerHTML = ''; // Clear board display
+      statusEl.textContent = '';
+      winnerMsg.textContent = '';
+      board = []; // Clear board data
+
+      hideAllMenus(); // This correctly hides the scoreboard.
+
+      if (step === 3) { // Currently in game (controls are active)
+        step = 2; // Go back to size selection
+        sizeSelect.classList.add('active');
+        console.log("[goBack] Back to size selection.");
+      } else if (step === 2) { // Currently in size selection
+        step = 1; // Go back to difficulty or name inputs
+        if (mode === 'ai') {
+          difficultySelect.classList.add('active');
+          console.log("[goBack] Back to difficulty selection.");
+        } else {
+          nameInputs.classList.add('active');
+          nameInput3.style.display = (mode === 'pvpvp') ? 'block' : 'none';
+          console.log("[goBack] Back to name inputs.");
+        }
+      } else if (step === 1) { // Currently in difficulty or name inputs
+        step = 0; // Go back to mode selection
+        menu.classList.add('active');
+        console.log("[goBack] Back to mode selection.");
+      } else { // Fallback, should always go to main menu
+        step = 0;
+        menu.classList.add('active');
+        console.log("[goBack] Defaulting to main menu.");
+      }
+      // Ensure scoreboard is hidden when going back to any menu screen
+      scoreboardEl.style.display = 'none';
+    }
+
+    // Initial call to hide all menus and show the main menu
+    hideAllMenus(); // This will explicitly hide the scoreboard when the page loads
+    menu.classList.add('active');
+    console.log("[Initial Load] Displaying main menu.");
+  </script>
+</body>
+</html>
